@@ -6,7 +6,7 @@ print_separator() {
     echo "======================================"
 }
 
-# Function to display a data item with a label
+# Function to display all configuration with a label
 print_data() {
     echo "$1: $2"
 }
@@ -22,11 +22,11 @@ print_separator
 echo "System Description"
 print_separator
 
-# Computer manufacturer
+# Computer manufacturer description
 manufacturer=$(dmidecode -s system-manufacturer)
 [ -n "$manufacturer" ] && print_data "Manufacturer" "$manufacturer"
 
-# Computer model
+# Computer model info.
 model=$(dmidecode -s system-product-name)
 [ -n "$model" ] && print_data "Model" "$model"
 
@@ -51,7 +51,7 @@ architecture=$(lscpu | grep "Architecture" | cut -d':' -f2 | xargs)
 core_count=$(lscpu | grep "CPU(s)" | cut -d':' -f2 | xargs)
 [ -n "$core_count" ] && print_data "Core Count" "$core_count"
 
-# CPU maximum speed
+# CPU maximum speed by default
 cpu_speed=$(lscpu | grep "CPU max" | cut -d':' -f2 | xargs)
 [ -n "$cpu_speed" ] && print_data "CPU Max Speed" "$cpu_speed"
 
