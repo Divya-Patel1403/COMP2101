@@ -1,37 +1,35 @@
 #!/bin/bash
 
-# Function to display a horizontal line
-print_line() {
-    echo "----------------------------------------"
+# Function to display a separator line
+print_separator() {
+    echo "==============="
 }
 
-# Display the fully-qualified domain name (FQDN)
-fqdn=$(hostname)
-echo "FQDN: $fqdn"
-print_line
+# Function to display a data item with a label
+print_data() {
+    echo "$1: $2"
+}
 
-# Display host information using hostnamectl
-echo "Host Information:"
-hostnamectl | grep "Static hostname"
-hostnamectl | grep "Icon name"
-hostnamectl | grep "Chassis"
-hostnamectl | grep "Machine ID"
-hostnamectl | grep "Boot ID"
-print_line
+# Get the system's hostname as well as the fully qualified domain name
+hostname=$(hostname)
+fqdn=$(hostname -f)
 
-# Display operating system information using hostnamectl
-echo "Operating System:"
-hostnamectl | grep "Operating System"
-hostnamectl | grep "Kernel"
-hostnamectl | grep "Architecture"
-print_line
+# Generating the operating system name and version
+os_info=$(lsb_release -d | cut -f2-)
 
-# Display IP addresses that are not on the 127 network
-echo "IP Addresses:"
-ip addr show | grep "inet " | awk '{print $2}' | grep -v "^127"
-print_line
+# Get the default IP address
+ip_address=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
-# Display root filesystem status using df
-echo "Root Filesystem Status:"
-df -h / | tail -n 1
+# Get the available space on the root filesystem in a human-friendly format
+disk_space=$(df -h / | awk 'NR==2 {print $4}')
+
+# Output the system information
+print_separator
+echo "Report for $hostname"
+print_separator
+print_data "FQDN" "$fqdn"
+print_data "Operating System name and version" "$os_info"
+print_data "IP Address" "$ip_address"
+print_data "Root Filesystem Free Space" "$disk_space"
+print_separator
 
