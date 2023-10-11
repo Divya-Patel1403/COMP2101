@@ -1,14 +1,21 @@
 #!/bin/bash
-# This is a Bash script to display system information.
+#
+# Enhanced sysinfo.sh script to display system information in sections.
+#
 
 # Function to display a separator line
 print_separator() {
-    echo "======================================"
+    echo "=============================="
 }
 
 # Function to display all configuration with a label
 print_data() {
     echo "$1: $2"
+}
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" &>/dev/null
 }
 
 # Check if the user has root privilege
@@ -76,18 +83,39 @@ distro=$(lsb_release -d | cut -f2-)
 distro_version=$(lsb_release -r | cut -f2-)
 [ -n "$distro_version" ] && print_data "Distro Version" "$distro_version"
 
-# Section 4: Additional Data (Add more as needed)
+# Section 4: RAM Information
+print_separator
+echo "RAM Information"
+print_separator
 
-# Save the script output to a file (uncomment to use)
-#output_file="/path/to/output/file.txt"
-#{
-#    echo "System Information"
-#    date
-#    echo
-#    cat /etc/os-release
-#    echo
-#    lscpu
-#} > "$output_file"
+# Installed RAM Components
+ram_info=$(dmidecode -t 17 | grep -A5 "Size:" | awk -F': ' '{print $2}')
+if [ -n "$ram_info" ]; then
+  for ((i=0; i<${#ram_info[@]}; i+=5)); do
+    echo "Component Manufacturer: ${ram_info[i]}"
+    echo "Component Model: ${ram_info[i+1]}"
+    echo "Component Size: ${ram_info[i+2]}"
+    echo "Component Speed: ${ram_info[i+3]}"
+    echo "Component Location: ${ram_info[i+4]}"
+  done
+else
+  echo "Data for this section is unavailable."
+fi
 
-# End of the script
+# Total Installed RAM
+total_ram_size=$(dmidecode -t 17 | grep "Size:" | awk '{total += $2} END {print total}')
+[ -n "$total_ram_size" ] && print_data "Total Installed RAM" "${total_ram_size} MB"
+
+# Section 5: Disk Storage Information
+print_separator
+echo "Disk Storage Information"
+print_separator
+
+# Installed Disk Drives
+disk_info=$(lsblk -lno "NAME,MODEL,SIZE,KNAME,MOUNTPOINT,FSTYPE,FSSIZE,FSUSED")
+if [ -n "$disk_info" ]; then
+  echo "$disk_info"
+else
+  echo "Data for this section is unavailable."
+fi
 
